@@ -129,7 +129,7 @@ void printStartupApplicationMessage() {
     printf("\n\n");
     printf("========================================\n");
     printf("   🚀 Starting Application 🚀\n");
-    ESP_LOGI("BIOS", "   🚀 Starting Application 🚀\n");
+    ESP_LOGI("APP_MAIN", "   🚀 Starting Application 🚀\n");
     printf("========================================\n");
     
 }
@@ -147,7 +147,7 @@ void printStartupApplicationMessage() {
 extern "C" void app_main(void) {
     //vTaskDelay(1000);  // Așteaptă puțin pentru a permite stabilizarea sistemului după boot
     printStartupApplicationMessage();
-    vTaskDelay(1000);  // Așteaptă puțin pentru a permite stabilizarea sistemului după boot
+    //vTaskDelay(1000);  // Așteaptă puțin pentru a permite stabilizarea sistemului după boot
 
     esp_log_level_set("*", ESP_LOG_INFO);  // Setează nivelul de logare pentru toate modulele la INFO
     ESP_LOGI("SYSTEM LOG", "SYSTEM WIDE LOG LEVEL SET TO ESP_LOG_INFO");
