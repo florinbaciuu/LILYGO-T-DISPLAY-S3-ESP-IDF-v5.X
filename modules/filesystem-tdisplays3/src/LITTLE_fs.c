@@ -121,6 +121,7 @@ esp_err_t initialize_filesystem_littlefs() {
     //     *pos = '\0';
     // }
     // ESP_LOGI(LITTLEFS_TAG, "Read from file: '%s'", line);
+    vTaskDelay(1);
     return ESP_OK;
 }
 

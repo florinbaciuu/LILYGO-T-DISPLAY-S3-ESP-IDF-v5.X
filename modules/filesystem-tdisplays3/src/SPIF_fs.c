@@ -134,7 +134,7 @@ esp_err_t initialize_filesystem_spiffs(){
     //     *pos = '\0';
     // }
     // ESP_LOGI(SPIFFS_TAG, "Read from file: '%s'", line);
-
+    vTaskDelay(1);
     return ESP_OK;
 }
 

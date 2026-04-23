@@ -35,7 +35,7 @@ extern "C"
     // register all commands
     void cli_register_all_commands(void);
     void cli_set_history_path(const char *path);
-    void Start_THMI_CLI();
+    void start_TDisplayS3_CLI();
 
 #ifdef __cplusplus
 }

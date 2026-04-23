@@ -19,7 +19,7 @@
 #define LV_TICK_SOURCE_TASK     1
 #define LV_TICK_SOURCE_CALLBACK 2
 #ifndef LV_TICK_SOURCE
-#    define LV_TICK_SOURCE (LV_TICK_SOURCE_TIMER)
+#    define LV_TICK_SOURCE (LV_TICK_SOURCE_TASK)
 #endif /* #ifndef LV_TICK_SOURCE */
 //---------
 //---------

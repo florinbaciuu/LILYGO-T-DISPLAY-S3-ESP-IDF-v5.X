@@ -16,16 +16,22 @@ lv_obj_t* tabview = NULL;
 void lvgl_ui_function(void);
 
 // -------------------------------
+/*********************
+ *  rtos variables
+ *********************/
+TaskHandle_t xHandle_lv_ui_task;
 
 /********************************************** */
 /*                   TASK                       */
 /********************************************** */
 void lv_ui_task(void* arg) {
-    // s_lvgl_lock(portMAX_DELAY);
+    (void) arg;
+    xHandle_lv_ui_task = xTaskGetCurrentTaskHandle();  // Încoronarea oficială
     s_lvgl_lock(portMAX_DELAY);
     lvgl_ui_function();  // lvgl ui
+    vTaskDelay(100);  // Așteaptă puțin pentru a permite stabilizarea UI-ului
     s_lvgl_unlock();
-    vTaskDelete(NULL);  // moare dupa creare
+    vTaskDelete(NULL);  // moare după creare
 }
 
 // -------------------------------

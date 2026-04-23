@@ -67,5 +67,6 @@ esp_err_t initialize_internal_fat_filesystem() {
         *pos = '\0';
     }
     ESP_LOGI(FFAT_TAG, "Read from file: '%s'", line);
+    vTaskDelay(1);
     return ESP_OK;
 }

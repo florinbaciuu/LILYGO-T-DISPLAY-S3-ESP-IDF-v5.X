@@ -1,6 +1,6 @@
 
 // Includes
-#include "config.h"
+#include "lvgl_config.h"
 #include "product_pins.h"
 #include "display_port.h"
 #include "driver/gpio.h"

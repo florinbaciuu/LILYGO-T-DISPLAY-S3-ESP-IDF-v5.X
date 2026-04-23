@@ -1,5 +1,5 @@
 
-#include "one-cli.h"
+#include "simple_cli.h"
 #include "init.h"
 #include "config.h"
 
@@ -36,6 +36,9 @@ void initialize_console_peripheral(void)
 
     /* Disable buffering on stdin */
     setvbuf(stdin, NULL, _IONBF, 0);
+
+    ESP_LOGI(TAG, "Console peripheral initialized");
+    vTaskDelay(1);
 }
 
 // ------------------------------------
@@ -82,6 +85,8 @@ void initialize_console_library(const char *history_path) {
   if (probe_status) { /* zero indicates success */
     linenoiseSetDumbMode(1);
   }
+  ESP_LOGI(TAG, "Console initialized with history path: %s", history_path);
+  vTaskDelay(1);
 }
 
 // ------------------------------------

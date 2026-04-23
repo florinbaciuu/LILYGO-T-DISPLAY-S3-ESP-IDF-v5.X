@@ -1,6 +1,6 @@
 
 // Includes
-#include "config.h"
+#include "lvgl_config.h"
 #include "lvgl_port.h"
 #include "display_port.h"
 #include "product_pins.h"
@@ -14,7 +14,7 @@
  *   LVGL FUNCTIONS
  **********************/
 
- /* Display flushing function callback */
+/* Display flushing function callback */
 void lv_disp_flush(lv_display_t* disp, const lv_area_t* area, uint8_t* px_map) { /* #if LVGL_BENCH_TEST */
     esp_lcd_panel_draw_bitmap(
         panel_handle, area->x1, area->y1, area->x2 + 1, area->y2 + 1, (const void*) px_map);
@@ -22,7 +22,6 @@ void lv_disp_flush(lv_display_t* disp, const lv_area_t* area, uint8_t* px_map) {
     lv_disp_flush_ready(disp);
 #endif /* #ifdef (flush_ready_in_disp_flush) */
 }
-
 
 // -------------------------------
 
@@ -104,6 +103,7 @@ void s_lvgl_set_buffers_config() {
 #else
     lv_display_set_buffers(disp, disp_draw_buf, NULL, bufSize, (lv_display_render_mode_t) RENDER_MODE);
 #endif
+    vTaskDelay(1);
 }
 
 // -------------------------------
@@ -117,15 +117,16 @@ void s_lvgl_display_panel_setup_config_properties() {
         (lv_display_render_mode_t) RENDER_MODE);  // Seteaza (lv_display_render_mode_t)
     lv_display_set_antialiasing(disp, true);      // Antialiasing DA sau NU
     ESP_LOGI("LVGL", "LVGL display settings done");
+    vTaskDelay(1);
 }
 
 // -------------------------------
-
 
 // -------------------------------
 
 void s_lvgl_port_init(void) {
     lv_init();
+    ESP_LOGI("LVGL", "LVGL initialized...");
 #if LV_TICK_SOURCE == LV_TICK_SOURCE_CALLBACK
     // Next function comment because create problems with lvgl timers and esp32 timers
     lv_tick_set_cb(lv_get_rtos_tick_count_callback);
@@ -161,8 +162,10 @@ static SemaphoreHandle_t s_lvgl_mutex = NULL;
 // -------------------------------
 
 bool s_lvgl_port_init_locking_mutex(void) {
-    if (!s_lvgl_mutex)
+    if (!s_lvgl_mutex) {
         s_lvgl_mutex = xSemaphoreCreateRecursiveMutex();
+        ESP_LOGI("LVGL", "LVGL mutex created...");
+    }
     return (s_lvgl_mutex != NULL);
 }
 
@@ -210,6 +213,8 @@ static void lv_tick_start_timer(void) {
 
     ESP_ERROR_CHECK(esp_timer_create(&timer_args, &tick_timer));
     ESP_ERROR_CHECK(esp_timer_start_periodic(tick_timer, LV_TIMER_INCREMENT));  // 1000 us = 1 ms
+    ESP_LOGI("Timer", "LVGL tick timer started with period %d ms", LV_TIMER_INCREMENT / 1000);
+    vTaskDelay(1);
 }
 
 /********************************************** */
@@ -225,7 +230,7 @@ void lv_main_task(void* parameter) {
             s_lvgl_unlock();  // <— ADD
         }
         vTaskDelayUntil(&tick, pdMS_TO_TICKS(LV_DELAY));
-         //vTaskDelay(LV_DELAY);
+        // vTaskDelay(LV_DELAY);
     }
 }
 
@@ -281,34 +286,34 @@ void lv_main_task(void* parameter) {
 /************************************************** */
 
 void create_and_start_lvgl_tasks(void) {
-    // =================================================================================================
+    ESP_LOGI("FreeRTOS", "LVGL RTOS Kernel starting...");
     static bool started = false;
     if (started)
         return;
     started = true;
-    esp_rom_delay_us(100);
     xTaskCreatePinnedToCore(lv_main_task,  // Functia task-ului
         (const char*) "LVGL Main Task",    // Numele task-ului
         (uint32_t) (8192),                 // Dimensiunea stack-ului
         (NULL),                            // Parametri (daca exista)
-        (UBaseType_t) 5,                   // Prioritatea task-ului // 3
+        (UBaseType_t) 6,                   // Prioritatea task-ului // 6
         &xHandle_lv_main_task,             // Handle-ul task-ului
         ((1))                              // Nucleul pe care ruleaza task-ul
     );
+    ESP_LOGI("FreeRTOS", "LVGL Main task created...");
 #if LV_TICK_SOURCE == LV_TICK_SOURCE_TIMER
     lv_tick_start_timer();
+    ESP_LOGI("Timer", "LVGL incremental tick timer created...");
 #elif LV_TICK_SOURCE == LV_TICK_SOURCE_TASK
-    esp_rom_delay_us(100);
     xTaskCreatePinnedToCore(lv_main_tick_task,  // Functia care ruleaza task-ul
         (const char*) "LVGL Tick Task",         // Numele task-ului
         (uint32_t) (3072),                      // Dimensiunea stack-ului
         (NULL),                                 // Parametri
-        (UBaseType_t) 3,                        // Prioritatea task-ului // 1
+        (UBaseType_t) 6,                        // Prioritatea task-ului // 6
         &xHandle_lv_main_tick_task,             // Handle-ul task-ului
         ((1))                                   // Nucleul pe care ruleaza (ESP32 e dual-core)
     );
+    ESP_LOGI("FreeRTOS", "LVGL incremental tick task created...");
 #endif /* #if LV_TICK_SOURCE == LV_TICK_SOURCE_TIMER */
-    esp_rom_delay_us(100);
 }
 
 /************************************************** */

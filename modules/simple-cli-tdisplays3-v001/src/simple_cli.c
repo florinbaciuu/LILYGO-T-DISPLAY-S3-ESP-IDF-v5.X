@@ -3,7 +3,7 @@
  */
 
 // include/command_line_interface.h
-#include "one-cli.h"
+#include "simple_cli.h"
 #include "modules.h"
 
 static const char* TAG = "CLI";
@@ -11,13 +11,12 @@ static const char* TAG = "CLI";
 // -------------------------------------------------
 
 void cli_register_all_commands(void) {
-    esp_console_register_help_command();  // asta efunctia predefinita a esp -idf.. aici trebuie
-                                          // lucrat in contionuare
     cli_register_hello_command();
     cli_register_restart_command();
     cli_register_tasks_command();
     cli_register_uptime_command();
     cli_register_timers_command();
+    ESP_LOGI(TAG, "All CLI commands registered");
     return;
 }
 
@@ -49,15 +48,6 @@ static const char* freertos_banner =
     "█████   ██████  █████   █████   ██████     ██    ██    ██ ███████\n"
     "██      ██   ██ ██      ██      ██   ██    ██    ██    ██      ██\n"
     "██      ██   ██ ███████ ███████ ██   ██    ██     ██████  ███████\n"
-    "\n";
-
-static const char* thmi_os_banner =
-    "\n"
-    "████████ ██   ██ ███    ███ ██              ██████  ███████\n"
-    "   ██    ██   ██ ████  ████ ██             ██    ██ ██     \n"
-    "   ██    ███████ ██ ████ ██ ██             ██    ██ ███████\n"
-    "   ██    ██   ██ ██  ██  ██ ██             ██    ██      ██\n"
-    "   ██    ██   ██ ██      ██ ██              ██████  ███████\n"
     "\n";
 
 TaskHandle_t xHandle__CLI;
@@ -93,6 +83,7 @@ void printStartupMessage() {
     }
     printf("🚀 Welcome, Commander. System is ready for input.\n");
     printf("💭 Remember: even the most powerful systems wait for a single command...\n");
+    ESP_LOGI(TAG, "Startup message printed");
     return;
 }
 
@@ -121,13 +112,11 @@ void rtos_init_cli() {
      * This can be customized, made dynamic, etc.
      */
     const char* prompt = setup_prompt(PROMPT_STR ">");
-    vTaskDelay(10);
+    vTaskDelay(50);
 
     /* Register commands */
-    // esp_console_register_help_command();
-    // register_system_common();
-    // cli_register_custom_help_command(); // aici am modificat ultima pt tine alua sa vezi
-    cli_register_all_commands();  // my command
+    esp_console_register_help_command();  // asta efunctia predefinita a esp -idf.. aici trebuie
+    cli_register_all_commands();          // comenzile mele personalizate
     return;
 }
 
@@ -136,14 +125,13 @@ void rtos_init_cli() {
 /********************************************** */
 void console_app(void* parameter) {
     (void) parameter;
-    // vTaskDelay(300);
     rtos_init_cli();
-    // vTaskDelay(300);
+    // vTaskDelay(pdMS_TO_TICKS(100));  // Așteaptă puțin pentru a permite stabilizarea consolei
     printStartupMessage();
-
+    ESP_LOGI(TAG, "Console initialized, starting CLI process loop");
+    vTaskDelay(1);
     while (true) {
         char* line = linenoise(prompt);
-
 #if CONFIG_CONSOLE_IGNORE_EMPTY_LINES
         if (line == NULL) { /* Ignore empty lines */
             continue;
@@ -154,51 +142,44 @@ void console_app(void* parameter) {
             break;
         }
 #endif  // CONFIG_CONSOLE_IGNORE_EMPTY_LINES
-
-        /* Add the command to the history if not empty*/
         if (strlen(line) > 0) {
-            linenoiseHistoryAdd(line);
+            linenoiseHistoryAdd(line); /* Add the command to the history if not empty*/
 #if CONFIG_CONSOLE_STORE_HISTORY
-            /* Save command history to filesystem */
-            if (s_history_path[0] != '\0') {  // avem path valid
-                linenoiseHistorySave(s_history_path);
+            if (s_history_path[0] != '\0') {          // avem path valid
+                linenoiseHistorySave(s_history_path); /* Save command history to filesystem */
             }
 #endif  // CONFIG_CONSOLE_STORE_HISTORY
         }
-
-        /* Try to run the command */
         int       ret;
-        esp_err_t err = esp_console_run(line, &ret);
+        esp_err_t err = esp_console_run(line, &ret); /* Try to run the command */
         if (err == ESP_ERR_NOT_FOUND) {
             printf("Unrecognized command\n");
         } else if (err == ESP_ERR_INVALID_ARG) {
-            // command was empty
+            printf("Empty command\n");
         } else if (err == ESP_OK && ret != ESP_OK) {
             printf("Command returned non-zero error code: 0x%x (%s)\n", ret, esp_err_to_name(ret));
         } else if (err != ESP_OK) {
             printf("Internal error: %s\n", esp_err_to_name(err));
         }
-        /* linenoise allocates line buffer on the heap, so need to free it */
-        linenoiseFree(line);
+        linenoiseFree(line); /* linenoise allocates line buffer on the heap, so need to free it */
     }
-
     ESP_LOGE(TAG, "Error or end-of-input, terminating console");
-    esp_console_deinit();
+    esp_console_deinit(); // Curăță resursele consolei
     return;
 }
 
 // -------------------------------
 
-void Start_THMI_CLI() {
+void start_TDisplayS3_CLI() {
     if (xHandle__CLI == NULL) {
-        xTaskCreatePinnedToCore(console_app,         // Functia care ruleaza task-ul
-            (const char*) "CLI Task",                // Numele task-ului
-            (uint32_t) (8192),                       // Dimensiunea stack-ului
-            (NULL),                                  // Parametri
+        xTaskCreatePinnedToCore(console_app,  // Functia care ruleaza task-ul
+            (const char*) "CLI Task",         // Numele task-ului
+            (uint32_t) (8192),                // Dimensiunea stack-ului
+            (NULL),                           // Parametri
             // (UBaseType_t) configMAX_PRIORITIES - 7,  // Prioritatea task-ului.  // PREA MULT ATENTIE
-            (UBaseType_t) tskIDLE_PRIORITY + 3,  // Prioritatea task-ului
-            &xHandle__CLI,  // Handle-ul task-ului
-            ((0))           // Nucleul pe care ruleaza (ESP32 e dual-core)
+            (UBaseType_t) tskIDLE_PRIORITY + 4,  // Prioritatea task-ului
+            &xHandle__CLI,                       // Handle-ul task-ului
+            ((1))                                // Nucleul pe care ruleaza (ESP32 e dual-core)
         );
     }
 }

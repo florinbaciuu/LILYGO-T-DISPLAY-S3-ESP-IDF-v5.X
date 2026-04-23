@@ -16,8 +16,7 @@
  * SETTINGS
  * comment all to chose internal MMC as filesystem
  */
-#define SDCARD_USE
-//#define LITTLEFS_USE
+#define LITTLEFS_USE
 //#define SPIFFS_USE
 //#define FFAT_USE
 
@@ -25,12 +24,9 @@
  * END SETTINGS
  */
 
-#ifdef SDCARD_USE
 
-    #define MOUNT_PATH "/sdcard"
-    #define HISTORY_PATH MOUNT_PATH "/history.txt"
 
-#elif defined(LITTLEFS_USE)
+#if defined(LITTLEFS_USE)
 
     #define BASE_PATH "/littlefs"
     #define PARTITION_LABEL "littlefs"
