@@ -3,7 +3,7 @@
  */
 
 // include/command_line_interface.h
-#include "simple_cli.h"
+#include "cli.h"
 #include "modules.h"
 
 static const char* TAG = "CLI";
@@ -111,7 +111,7 @@ void rtos_init_cli() {
     /* Prompt to be printed before each line.
      * This can be customized, made dynamic, etc.
      */
-    const char* prompt = setup_prompt(PROMPT_STR ">");
+    const char* prompt = (char *)setup_prompt(PROMPT_STR ">");
     vTaskDelay(50);
 
     /* Register commands */

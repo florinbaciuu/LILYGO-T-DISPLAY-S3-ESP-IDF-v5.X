@@ -23,7 +23,7 @@ set(app_requires
     littlefs
     lvgl
     filesystem-tdisplays3
-    simple-cli-tdisplays3-v001
+    cli-tdisplays3
     )
 
 set(

@@ -1,5 +1,5 @@
 
-#include "simple_cli.h"
+#include "cli.h"
 #include "init.h"
 #include "config.h"
 
@@ -30,6 +30,7 @@ void initialize_console_peripheral(void)
 
     /* Install USB-SERIAL-JTAG driver for interrupt-driven reads and writes */
     ESP_ERROR_CHECK(usb_serial_jtag_driver_install(&jtag_config));
+    ESP_LOGI(TAG, "USB-Serial-JTAG driver installed");
 
     /* Tell vfs to use usb-serial-jtag driver */
     usb_serial_jtag_vfs_use_driver();

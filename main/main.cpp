@@ -10,7 +10,7 @@ extern "C" {
 #include "display_port.h"
 #include "lvgl_port.h"
 #include "lvgl_ui.hpp"
-#include "simple_cli.h"
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -18,7 +18,9 @@ extern "C" {
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+
 #include "filesystem.h"
+#include "cli.h"
 }
 
 /*********************
@@ -123,11 +125,19 @@ void chechButton0State(void* parameter) {
     }
 }
 /****************************/
+void printStartupApplicationMessage() {
+    printf("\n\n");
+    printf("========================================\n");
+    printf("   🚀 Starting Application 🚀\n");
+    ESP_LOGI("BIOS", "   🚀 Starting Application 🚀\n");
+    printf("========================================\n");
+    
+}
 //--------------------------------------
 /*
-███    ███  █████  ██ ███    ██ 
-████  ████ ██   ██ ██ ████   ██ 
-██ ████ ██ ███████ ██ ██ ██  ██ 
+███    ███  █████  ██ ███    ██ 
+████  ████ ██   ██ ██ ████   ██ s
+██ ████ ██ ███████ ██ ██ ██  ██ 
 ██  ██  ██ ██   ██ ██ ██  ██ ██ 
 ██      ██ ██   ██ ██ ██   ████ 
   * This is the main entry point of the application.
@@ -135,9 +145,9 @@ void chechButton0State(void* parameter) {
   * The application will run indefinitely until the device is powered off or reset.
 */
 extern "C" void app_main(void) {
-    vTaskDelay(1);  // Așteaptă puțin pentru a permite stabilizarea sistemului după boot
-    ESP_LOGI("APP_MAIN", "Starting application...");
-    vTaskDelay(100);  // Așteaptă puțin pentru a permite stabilizarea sistemului după boot
+    //vTaskDelay(1000);  // Așteaptă puțin pentru a permite stabilizarea sistemului după boot
+    printStartupApplicationMessage();
+    vTaskDelay(1000);  // Așteaptă puțin pentru a permite stabilizarea sistemului după boot
 
     esp_log_level_set("*", ESP_LOG_INFO);  // Setează nivelul de logare pentru toate modulele la INFO
     ESP_LOGI("SYSTEM LOG", "SYSTEM WIDE LOG LEVEL SET TO ESP_LOG_INFO");
