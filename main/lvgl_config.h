@@ -19,7 +19,7 @@
 #define LV_TICK_SOURCE_TASK     1
 #define LV_TICK_SOURCE_CALLBACK 2
 #ifndef LV_TICK_SOURCE
-#    define LV_TICK_SOURCE (LV_TICK_SOURCE_TASK)
+#    define LV_TICK_SOURCE (LV_TICK_SOURCE_CALLBACK)
 #endif /* #ifndef LV_TICK_SOURCE */
 //---------
 //---------
@@ -42,7 +42,7 @@
 #define BUFFER_INTERNAL 1
 #define BUFFER_SPIRAM   2
 #define BUFFER_MEM      BUFFER_SPIRAM
-#if (BUFFER_MEM == BUFFER_INTERNAL)
+#if (BUFFER_MEM == BUFFER_SPIRAM)
 #    define DMA_ON (true)
 #endif /* #if (BUFFER_MEM == BUFFER_INTERNAL) */
 //---------
